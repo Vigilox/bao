@@ -1,8 +1,8 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight, Sparkles, Video, Image as ImageIcon, Zap, Palette } from 'lucide-react';
+import { SiteNavigation } from '@/components/navigation/site-navigation';
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
@@ -10,61 +10,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-16 h-16">
-                <Image
-                  src="/logo.png"
-                  alt="BAO Logo"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <span className="text-2xl font-bold text-foreground">BAO</span>
-            </Link>
-
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
-                Dashboard
-              </Link>
-              <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
-                Features
-              </Link>
-            </div>
-
-            {/* Auth Buttons */}
-            <div className="flex items-center gap-4">
-              {session ? (
-                <Link
-                  href="/dashboard"
-                  className="px-6 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition shadow-lg shadow-primary/25"
-                >
-                  Go to Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/auth/signin"
-                    className="px-6 py-2.5 text-sm font-medium text-foreground hover:text-primary transition"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    className="px-6 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition shadow-lg shadow-primary/25"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <SiteNavigation />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white pt-20 pb-32">

@@ -2,18 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import {
   Plus,
-  LogOut,
   FolderOpen,
   Loader2,
   Film,
   Image as ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SiteNavigation } from '@/components/navigation/site-navigation';
 
 interface Project {
   id: string;
@@ -75,42 +74,10 @@ export function DashboardClient() {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut({ redirect: true, callbackUrl: '/auth/signin' });
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="relative w-14 h-14">
-              <Image
-                src="/logo.png"
-                alt="BAO Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">BAO</h1>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Welcome back</p>
-              <p className="text-sm font-medium text-foreground">{session?.user?.name || session?.user?.email}</p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="p-2 hover:bg-secondary rounded-lg transition"
-              title="Sign out"
-            >
-              <LogOut className="h-5 w-5 text-muted-foreground" />
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Navigation */}
+      <SiteNavigation />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12">

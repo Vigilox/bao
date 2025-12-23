@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { projectId, name, description, widthPx = 800, heightPx = 600, data = [] } = body
+    const { projectId, name, description, widthPx = 800, heightPx = 600, data = [], templateId } = body
 
     if (!projectId || !name) {
       return NextResponse.json({ error: 'Project ID and name required' }, { status: 400 })
@@ -90,14 +90,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
+    // If templateId is provided, load template data
+    let artboardData = data
+    let artboardWidth = widthPx
+    let artboardHeight = heightPx
+    let artboardDescription = description
+
+    if (templateId) {
+      const template = await prisma.template.findUnique({
+        where: { id: templateId },
+      })
+
+      if (template) {
+        artboardData = template.data
+        artboardWidth = template.widthPx
+        artboardHeight = template.heightPx
+        artboardDescription = template.description || description
+      }
+    }
+
     const artboard = await prisma.artboard.create({
       data: {
         projectId,
         name,
-        description,
-        widthPx,
-        heightPx,
-        data,
+        description: artboardDescription,
+        widthPx: artboardWidth,
+        heightPx: artboardHeight,
+        data: artboardData,
+        templateId: templateId || null,
       },
     })
 

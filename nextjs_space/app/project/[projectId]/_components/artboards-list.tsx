@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, Loader2, Palette, Trash2 } from 'lucide-react'
+import { Plus, Loader2, Palette, Trash2, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
+import TemplateGallery from '@/components/design-tool/template-gallery'
+import { toast } from 'sonner'
 
 interface Artboard {
   id: string
@@ -28,6 +30,7 @@ export function ArtboardsList({ projectId }: ArtboardsListProps) {
   const [artboards, setArtboards] = useState<Artboard[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false)
 
   useEffect(() => {
     fetchArtboards()
@@ -86,6 +89,33 @@ export function ArtboardsList({ projectId }: ArtboardsListProps) {
     }
   }
 
+  const handleTemplateSelect = async (templateId: string) => {
+    const name = prompt('Enter artboard name:')
+    if (!name) return
+
+    setCreating(true)
+    try {
+      const res = await fetch('/api/artboards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, name, templateId }),
+      })
+
+      if (res?.ok) {
+        const data = await res.json()
+        toast.success('Artboard created from template!')
+        router.push(`/design-tool/${data?.artboard?.id}`)
+      } else {
+        toast.error('Failed to create artboard')
+      }
+    } catch (error) {
+      console.error('Error creating artboard from template:', error)
+      toast.error('Failed to create artboard')
+    } finally {
+      setCreating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -101,19 +131,36 @@ export function ArtboardsList({ projectId }: ArtboardsListProps) {
           <h3 className="text-xl font-semibold text-foreground">Artboards</h3>
           <p className="text-sm text-muted-foreground">Design canvases for your project</p>
         </div>
-        <Button
-          onClick={createArtboard}
-          disabled={creating}
-          className="flex items-center gap-2"
-        >
-          {creating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
-          New Artboard
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowTemplateGallery(true)}
+            disabled={creating}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            From Template
+          </Button>
+          <Button
+            onClick={createArtboard}
+            disabled={creating}
+            className="flex items-center gap-2"
+          >
+            {creating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            New Artboard
+          </Button>
+        </div>
       </div>
+
+      <TemplateGallery
+        open={showTemplateGallery}
+        onClose={() => setShowTemplateGallery(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
 
       {artboards.length === 0 ? (
         <Card className="p-12 text-center">

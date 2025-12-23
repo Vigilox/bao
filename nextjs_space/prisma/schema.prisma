@@ -224,13 +224,17 @@ model Artboard {
   widthPx     Int      @default(800)
   heightPx    Int      @default(600)
   data        Json     // Canvas objects state
+  templateId  String?  // Reference to template if created from one
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project   Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  snapshots ArtboardSnapshot[]
+  project       Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  template      Template?              @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  snapshots     ArtboardSnapshot[]
+  collaborators ArtboardCollaborator[]
 
   @@index([projectId])
+  @@index([templateId])
   @@map("artboards")
 }
 
@@ -248,4 +252,44 @@ model ArtboardSnapshot {
   @@index([artboardId])
   @@index([projectId])
   @@map("artboard_snapshots")
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  category    String   // 'social-media', 'banner', 'business-card', 'flyer', 'poster', etc.
+  widthPx     Int
+  heightPx    Int
+  thumbnailUrl String?
+  data        Json     // Default canvas objects
+  tags        String[] @default([])
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  artboards Artboard[]
+
+  @@index([category])
+  @@map("templates")
+}
+
+model ArtboardCollaborator {
+  id          String   @id @default(cuid())
+  artboardId  String
+  userId      String
+  userName    String
+  userEmail   String
+  color       String   // Hex color for cursor
+  cursorX     Float?
+  cursorY     Float?
+  lastActive  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  artboard Artboard @relation(fields: [artboardId], references: [id], onDelete: Cascade)
+
+  @@unique([artboardId, userId])
+  @@index([artboardId])
+  @@index([userId])
+  @@map("artboard_collaborators")
 }

@@ -15,6 +15,7 @@ import {
   Loader2,
   Grid3X3,
   Magnet,
+  Sparkles,
 } from 'lucide-react'
 import DesignCanvas from '@/components/design-tool/design-canvas'
 import HistoryControls from '@/components/design-tool/history-controls'
@@ -25,8 +26,13 @@ import SmartGuidesOverlay from '@/components/design-tool/smart-guides-overlay'
 import GuideLines from '@/components/design-tool/guide-lines'
 import Ruler from '@/components/design-tool/ruler'
 import LayerPanel from '@/components/design-tool/layer-panel'
+import ExportControls from '@/components/design-tool/export-controls'
+import CollaboratorsPanel from '@/components/design-tool/collaborators-panel'
+import CollaborationCursors from '@/components/design-tool/collaboration-cursors'
+import AISuggestionsPanel from '@/components/design-tool/ai-suggestions-panel'
 import { useToast } from '@/hooks/use-toast'
 import { Canvas } from 'fabric'
+import { useSession } from 'next-auth/react'
 
 interface Artboard {
   id: string
@@ -82,7 +88,9 @@ interface DesignToolClientProps {
 }
 
 export default function DesignToolClient({ artboard }: DesignToolClientProps) {
+  const { data: session } = useSession() || {}
   const canvasRef = useRef<DesignCanvasRef>(null)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
   const [selectedTool, setSelectedTool] = useState('select')
   const [selectedObject, setSelectedObject] = useState<CanvasObject | null>(null)
   const [canvasObjects, setCanvasObjects] = useState<CanvasObject[]>(artboard.data || [])
@@ -95,7 +103,9 @@ export default function DesignToolClient({ artboard }: DesignToolClientProps) {
   const [guides, setGuides] = useState<{ id: string, orientation: 'horizontal' | 'vertical', position: number }[]>([])
   const [historyStack, setHistoryStack] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+  const [showAIPanel, setShowAIPanel] = useState(false)
   const { toast } = useToast()
+  const userId = session?.user?.email || undefined
 
   const tools = [
     { id: 'select', name: 'Select', icon: MousePointer },
@@ -265,6 +275,46 @@ export default function DesignToolClient({ artboard }: DesignToolClientProps) {
     return 1
   })()
 
+  // Track cursor position for collaboration
+  useEffect(() => {
+    if (!canvasContainerRef.current) return
+
+    const updateCursorPosition = async (e: MouseEvent) => {
+      const rect = canvasContainerRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const cursorX = e.clientX - rect.left
+      const cursorY = e.clientY - rect.top
+
+      try {
+        await fetch(`/api/artboards/${artboard.id}/collaborators`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cursorX, cursorY }),
+        })
+      } catch (error) {
+        // Silently fail - collaboration is not critical
+      }
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      updateCursorPosition(e)
+    }
+
+    canvasContainerRef.current.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      canvasContainerRef.current?.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [artboard.id])
+
+  // Cleanup collaborator on unmount
+  useEffect(() => {
+    return () => {
+      fetch(`/api/artboards/${artboard.id}/collaborators`, { method: 'DELETE' }).catch(() => {})
+    }
+  }, [artboard.id])
+
   return (
     <div className="flex h-screen bg-background">
       {/* Left Sidebar - Layers */}
@@ -357,6 +407,17 @@ export default function DesignToolClient({ artboard }: DesignToolClientProps) {
             </div>
 
             <div className="flex items-center gap-3">
+              <CollaboratorsPanel artboardId={artboard.id} currentUserId={userId} />
+              <ExportControls canvas={canvasRef.current?.getCanvas()} artboardName={artboard.name} />
+              <Button
+                variant={showAIPanel ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowAIPanel(!showAIPanel)}
+                className="flex items-center gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Assistant
+              </Button>
               <div className="text-xs text-muted-foreground">
                 {saving ? 'Saving...' : 'Saved'}
               </div>
@@ -437,7 +498,10 @@ export default function DesignToolClient({ artboard }: DesignToolClientProps) {
         </div>
 
         {/* Canvas Area */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-background overflow-auto">
+        <div 
+          ref={canvasContainerRef}
+          className="flex-1 flex items-center justify-center p-8 bg-background overflow-auto"
+        >
           <div className="relative flex">
             <Ruler
               orientation="vertical"
@@ -488,9 +552,31 @@ export default function DesignToolClient({ artboard }: DesignToolClientProps) {
                 />
               </div>
             </div>
+            
+            {/* Collaboration Cursors Overlay */}
+            <CollaborationCursors
+              artboardId={artboard.id}
+              currentUserId={userId}
+              canvasRef={canvasContainerRef}
+            />
           </div>
         </div>
       </div>
+
+      {/* Right Sidebar - AI Suggestions (conditionally rendered) */}
+      {showAIPanel && (
+        <AISuggestionsPanel
+          onApplyColor={(color) => {
+            const canvas = canvasRef.current?.getCanvas()
+            if (!canvas) return
+            const activeObject = canvas.getActiveObject()
+            if (activeObject) {
+              activeObject.set('fill', color)
+              canvas.renderAll()
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

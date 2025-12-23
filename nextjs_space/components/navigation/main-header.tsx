@@ -9,6 +9,7 @@ import { AnimatePresence } from 'framer-motion';
 import { StudioMegaMenu } from './studio-megamenu';
 import { TemplatesMegaMenu } from './templates-megamenu';
 import { ResourcesMegaMenu } from './resources-megamenu';
+import { AccountMegaMenu } from './account-megamenu';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-type MegaMenuType = 'studio' | 'templates' | 'resources' | null;
+type MegaMenuType = 'studio' | 'templates' | 'resources' | 'account' | null;
 
 export function MainHeader() {
   const { data: session } = useSession() || {};
@@ -104,6 +105,21 @@ export function MainHeader() {
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
+
+            {/* My Account Dropdown - Only show when logged in */}
+            {session && (
+              <div
+                className="relative"
+                onMouseEnter={() => handleMouseEnter('account')}
+              >
+                <button
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors rounded-lg hover:bg-primary/5 flex items-center gap-1"
+                >
+                  My Account
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
             <Link
               href="#pricing"
@@ -215,6 +231,7 @@ export function MainHeader() {
         {activeMegaMenu === 'studio' && <StudioMegaMenu />}
         {activeMegaMenu === 'templates' && <TemplatesMegaMenu />}
         {activeMegaMenu === 'resources' && <ResourcesMegaMenu />}
+        {activeMegaMenu === 'account' && <AccountMegaMenu />}
       </AnimatePresence>
 
       {/* Mobile Menu */}
@@ -249,6 +266,15 @@ export function MainHeader() {
             >
               Resources
             </Link>
+            {session && (
+              <Link
+                href="/dashboard"
+                className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-primary/5 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                My Account
+              </Link>
+            )}
             <Link
               href="#pricing"
               className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-primary/5 rounded-lg"

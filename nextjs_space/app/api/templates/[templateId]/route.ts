@@ -1,16 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
-// GET /api/templates/[templateId] - Get template details
+// GET /api/templates/[templateId] - Get a single template with full data
 export async function GET(
-  req: NextRequest,
+  request: Request,
   { params }: { params: { templateId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -22,9 +23,12 @@ export async function GET(
       return NextResponse.json({ error: 'Template not found' }, { status: 404 });
     }
 
-    return NextResponse.json(template);
-  } catch (error: any) {
-    console.error('Error fetching template:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ template });
+  } catch (error) {
+    console.error('Template fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch template' },
+      { status: 500 }
+    );
   }
 }

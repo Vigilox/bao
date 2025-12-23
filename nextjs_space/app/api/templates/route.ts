@@ -1,24 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
-// GET /api/templates - List all templates
-export async function GET(req: NextRequest) {
+// GET /api/templates - List all templates (with optional filtering)
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const search = searchParams.get('search');
 
-    const where = category ? { category } : {};
+    const where: any = {};
+    
+    if (category) {
+      where.category = category;
+    }
+    
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { tags: { hasSome: [search.toLowerCase()] } },
+      ];
+    }
 
     const templates = await prisma.template.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { category: 'asc' },
+        { name: 'asc' },
+      ],
       select: {
         id: true,
         name: true,
@@ -26,16 +43,17 @@ export async function GET(req: NextRequest) {
         category: true,
         widthPx: true,
         heightPx: true,
-        thumbnailUrl: true,
         tags: true,
-        isPremium: true,
         createdAt: true,
       },
     });
 
-    return NextResponse.json(templates);
-  } catch (error: any) {
-    console.error('Error fetching templates:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ templates });
+  } catch (error) {
+    console.error('Templates fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch templates' },
+      { status: 500 }
+    );
   }
 }

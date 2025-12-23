@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -39,38 +40,45 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-secondary/30 to-white px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-purple-500/20">
+        <div className="bg-white backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-border">
           {/* Logo */}
           <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-purple-400" />
-              <h1 className="text-3xl font-bold text-white">BAO</h1>
-            </div>
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative w-12 h-12">
+                <Image
+                  src="/logo.png"
+                  alt="BAO Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <h1 className="text-3xl font-bold text-foreground">BAO</h1>
+            </Link>
           </div>
 
-          <h2 className="text-2xl font-semibold text-center mb-2 text-white">
+          <h2 className="text-2xl font-semibold text-center mb-2 text-foreground">
             Welcome back
           </h2>
-          <p className="text-center text-slate-400 mb-8">
+          <p className="text-center text-muted-foreground mb-8">
             Sign in to your creative studio
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 text-red-400 text-sm">
+              <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-3 text-destructive text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                 Email
               </label>
               <input
@@ -79,13 +87,13 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-slate-500 transition"
+                className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder-muted-foreground transition"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
                 Password
               </label>
               <input
@@ -94,7 +102,7 @@ export default function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-slate-500 transition"
+                className="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder-muted-foreground transition"
                 placeholder="••••••••"
               />
             </div>
@@ -102,7 +110,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transition duration-200 shadow-lg shadow-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition duration-200 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -116,11 +124,11 @@ export default function SignInPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-slate-400">
+            <p className="text-muted-foreground">
               Don't have an account?{' '}
               <Link
                 href="/auth/signup"
-                className="text-purple-400 hover:text-purple-300 font-medium transition"
+                className="text-primary hover:text-primary/80 font-medium transition"
               >
                 Sign up
               </Link>

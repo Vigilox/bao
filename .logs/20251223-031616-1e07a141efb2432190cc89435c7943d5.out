@@ -6,3 +6,60 @@
 
  ✓ Starting...
  ✓ Ready in 1200ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.1s (794 modules)
+ GET / 200 in 2388ms
+ ✓ Compiled in 204ms (280 modules)
+ GET / 200 in 21ms
+ GET / 200 in 15ms
+ GET / 200 in 14ms
+ GET / 200 in 16ms
+ GET / 200 in 12ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 1123ms (1425 modules)
+ GET /api/auth/session 200 in 1304ms
+ GET /api/auth/session 200 in 16ms
+ GET / 200 in 47ms
+ GET / 200 in 19ms
+ GET / 200 in 24ms
+ GET / 200 in 17ms
+ GET / 200 in 15ms
+ GET / 200 in 16ms
+ GET / 200 in 18ms
+ GET /api/auth/providers 200 in 25ms
+ GET /api/auth/csrf 200 in 6ms
+ POST /api/auth/callback/credentials 401 in 342ms
+ GET / 200 in 15ms
+ GET /api/auth/providers 200 in 20ms
+ GET /api/auth/csrf 200 in 5ms
+ POST /api/auth/callback/credentials 200 in 290ms
+ GET /api/auth/session 200 in 21ms
+ ✓ Compiled /dashboard in 334ms (1439 modules)
+ GET /dashboard?_rsc=3y0gy 200 in 26ms
+ ✓ Compiled /api/projects in 135ms (867 modules)
+ GET /api/projects 200 in 175ms
+ GET /api/projects 200 in 9ms
+ ✓ Compiled /project/[projectId] in 303ms (1504 modules)
+ GET /project/sample-project-1?_rsc=z9izr 200 in 22ms
+ ✓ Compiled /api/projects/[projectId] in 97ms (890 modules)
+ GET /api/projects/sample-project-1 200 in 343ms
+ GET /api/projects/sample-project-1 200 in 19ms
+ ○ Compiling /api/assets ...
+ ✓ Compiled /api/assets in 624ms (1297 modules)
+ GET /api/assets?projectId=sample-project-1 200 in 709ms
+ GET /api/assets?projectId=sample-project-1 200 in 7ms
+ GET / 200 in 40ms
+ GET / 200 in 17ms
+ ✓ Compiled in 368ms (628 modules)
+ ✓ Compiled in 257ms (628 modules)
+ ✓ Compiled in 270ms (628 modules)
+ ✓ Compiled in 138ms (628 modules)
+ ✓ Compiled in 232ms (628 modules)
+ ✓ Compiled in 290ms (643 modules)
+ ✓ Compiled in 227ms (643 modules)
+ ✓ Compiled in 167ms (643 modules)
+ ✓ Compiled in 137ms (643 modules)
+ ✓ Compiled in 222ms (643 modules)
+ ✓ Compiled in 168ms (643 modules)
+ ✓ Compiled in 227ms (643 modules)
+[?25h

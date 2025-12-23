@@ -6,7 +6,6 @@ import { signOut, useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import {
   Plus,
-  Sparkles,
   LogOut,
   FolderOpen,
   Loader2,
@@ -14,6 +13,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Project {
   id: string;
@@ -80,26 +80,33 @@ export function DashboardClient() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-purple-500/20">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-7 w-7 text-purple-400" />
-            <h1 className="text-2xl font-bold text-white">BAO Studio</h1>
-          </div>
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <div className="relative w-10 h-10">
+              <Image
+                src="/logo.png"
+                alt="BAO Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">BAO Studio</h1>
+          </Link>
 
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-slate-400">Welcome back</p>
-              <p className="text-sm font-medium text-white">{session?.user?.name || session?.user?.email}</p>
+              <p className="text-sm text-muted-foreground">Welcome back</p>
+              <p className="text-sm font-medium text-foreground">{session?.user?.name || session?.user?.email}</p>
             </div>
             <button
               onClick={handleSignOut}
-              className="p-2 hover:bg-slate-800 rounded-lg transition"
+              className="p-2 hover:bg-secondary rounded-lg transition"
               title="Sign out"
             >
-              <LogOut className="h-5 w-5 text-slate-400" />
+              <LogOut className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>
         </div>
@@ -114,13 +121,13 @@ export function DashboardClient() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Your Projects</h2>
-              <p className="text-slate-400">Create and manage your creative projects</p>
+              <h2 className="text-3xl font-bold text-foreground mb-2">Your Projects</h2>
+              <p className="text-muted-foreground">Create and manage your creative projects</p>
             </div>
             <button
               onClick={createProject}
               disabled={creating}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-lg transition duration-200 shadow-lg shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition duration-200 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -134,16 +141,16 @@ export function DashboardClient() {
           {/* Projects Grid */}
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : projects?.length === 0 ? (
             <div className="text-center py-20">
-              <FolderOpen className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-400 mb-2">No projects yet</h3>
-              <p className="text-slate-500 mb-6">Create your first project to get started</p>
+              <FolderOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">No projects yet</h3>
+              <p className="text-muted-foreground mb-6">Create your first project to get started</p>
               <button
                 onClick={createProject}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition"
               >
                 <Plus className="h-5 w-5" />
                 Create Project
@@ -159,27 +166,27 @@ export function DashboardClient() {
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
                   <Link href={`/project/${project?.id}`}>
-                    <div className="group bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 hover:border-purple-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer">
+                    <div className="group bg-white rounded-xl p-6 border border-border hover:border-primary/50 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20 cursor-pointer">
                       <div className="flex items-start justify-between mb-4">
-                        <div className="p-3 bg-purple-500/10 rounded-lg">
-                          <Film className="h-6 w-6 text-purple-400" />
+                        <div className="p-3 bg-primary/10 rounded-lg">
+                          <Film className="h-6 w-6 text-primary" />
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted-foreground">
                           {new Date(project?.updatedAt).toLocaleDateString()}
                         </div>
                       </div>
 
-                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-400 transition">
+                      <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition">
                         {project?.name}
                       </h3>
 
                       {project?.description && (
-                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                           {project?.description}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-4 text-xs text-slate-500">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Film className="h-4 w-4" />
                           <span>{project?._count?.scenes || 0} scenes</span>

@@ -114,6 +114,86 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* NanoBanana CTA Section */}
+      <section className="relative py-32 bg-gradient-to-br from-primary via-primary/90 to-accent overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse delay-700"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-white">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white mb-8 border border-white/30">
+              <Sparkles className="h-5 w-5" />
+              Powered by Advanced AI
+            </div>
+
+            {/* Main Headline */}
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              Experience
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-pink-200 to-purple-200">
+                NanoBanana
+              </span>
+            </h2>
+
+            {/* Description */}
+            <p className="text-xl sm:text-2xl text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed">
+              Transform your imagination into stunning visuals with our cutting-edge AI image generation.
+              <br className="hidden sm:block" />
+              From character art to product mockups, create anything you can dream of in seconds.
+            </p>
+
+            {/* Features Grid */}
+            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="text-3xl font-bold mb-2">⚡</div>
+                <div className="text-white font-semibold text-lg mb-1">Lightning Fast</div>
+                <div className="text-white/80 text-sm">Generate in seconds</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="text-3xl font-bold mb-2">🎨</div>
+                <div className="text-white font-semibold text-lg mb-1">Studio Quality</div>
+                <div className="text-white/80 text-sm">Professional results</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="text-3xl font-bold mb-2">✨</div>
+                <div className="text-white font-semibold text-lg mb-1">Limitless Creative</div>
+                <div className="text-white/80 text-sm">Any style, any concept</div>
+              </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href={session ? "/dashboard" : "/auth/signup"}
+                className="group px-10 py-5 bg-white text-primary font-bold text-lg rounded-xl hover:bg-white/90 transition shadow-2xl hover:shadow-white/40 flex items-center gap-3 hover:scale-105 transform"
+              >
+                Start Creating Now
+                <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition" />
+              </Link>
+              <Link
+                href="/dashboard"
+                className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white font-bold text-lg rounded-xl hover:bg-white/20 transition border-2 border-white/30 hover:border-white/50 flex items-center gap-3"
+              >
+                View Examples
+                <ImageIcon className="h-6 w-6" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Wave */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z" fill="rgb(248 250 252)" fillOpacity="1"/>
+          </svg>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

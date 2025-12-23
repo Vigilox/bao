@@ -20,6 +20,8 @@ import { ChatMessage } from './chat-message';
 import { ArtifactPanel } from './artifact-panel';
 import { SceneList } from './scene-list';
 import { ArtboardsList } from './artboards-list';
+import { VideoGenerationPanel } from '@/components/video-generation-panel';
+import { VideoGallery } from '@/components/video-gallery';
 
 interface Project {
   id: string;
@@ -41,7 +43,7 @@ export function ProjectClient({ projectId }: { projectId: string }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [showArtifacts, setShowArtifacts] = useState(false);
-  const [activeView, setActiveView] = useState<'chat' | 'scenes' | 'artboards'>('chat');
+  const [activeView, setActiveView] = useState<'chat' | 'scenes' | 'artboards' | 'videos'>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -223,6 +225,18 @@ export function ProjectClient({ projectId }: { projectId: string }) {
               </svg>
               <span className="text-sm hidden md:inline">Artboards</span>
             </button>
+            <button
+              onClick={() => setActiveView('videos')}
+              className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
+                activeView === 'videos'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground hover:text-foreground'
+              }`}
+              title="Videos"
+            >
+              <Video className="h-5 w-5" />
+              <span className="text-sm hidden md:inline">Videos</span>
+            </button>
           </div>
         </div>
       </header>
@@ -296,6 +310,24 @@ export function ProjectClient({ projectId }: { projectId: string }) {
           <SceneList projectId={projectId} scenes={project?.scenes || []} />
         ) : activeView === 'artboards' ? (
           <ArtboardsList projectId={projectId} />
+        ) : activeView === 'videos' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Video Generation Panel */}
+            <div className="lg:col-span-1">
+              <VideoGenerationPanel
+                projectId={projectId}
+                onVideoGenerated={(taskId) => {
+                  // Refresh video gallery when a new video is generated
+                  console.log('Video task created:', taskId);
+                }}
+              />
+            </div>
+
+            {/* Video Gallery */}
+            <div className="lg:col-span-2">
+              <VideoGallery projectId={projectId} autoRefresh={true} />
+            </div>
+          </div>
         ) : null}
       </div>
     </div>

@@ -1,0 +1,3 @@
+lib/rag.ts(192,26): error TS2322: Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter | FieldRef<"DocumentChunk", "Json"> | undefined'.
+lib/rag.ts(206,32): error TS2339: Property 'documentChunks' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; projectId: string; filename: string; cloudStoragePath: string; isPublic: boolean; contentType: string; extractedText: string | null; }'.
+exit_code=2

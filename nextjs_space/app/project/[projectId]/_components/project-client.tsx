@@ -154,8 +154,8 @@ export function ProjectClient({ projectId }: { projectId: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -165,20 +165,20 @@ export function ProjectClient({ projectId }: { projectId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-purple-500/20">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
-              <button className="p-2 hover:bg-slate-800 rounded-lg transition">
-                <ArrowLeft className="h-5 w-5 text-slate-400" />
+              <button className="p-2 hover:bg-secondary rounded-lg transition">
+                <ArrowLeft className="h-5 w-5 text-muted-foreground" />
               </button>
             </Link>
             <div>
-              <h1 className="text-lg font-semibold text-white">{project?.name}</h1>
+              <h1 className="text-lg font-semibold text-foreground">{project?.name}</h1>
               {project?.description && (
-                <p className="text-sm text-slate-400">{project?.description}</p>
+                <p className="text-sm text-muted-foreground">{project?.description}</p>
               )}
             </div>
           </div>
@@ -188,8 +188,8 @@ export function ProjectClient({ projectId }: { projectId: string }) {
               onClick={() => setActiveView('chat')}
               className={`px-4 py-2 rounded-lg transition ${
                 activeView === 'chat'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground hover:text-foreground'
               }`}
             >
               <MessageSquare className="h-5 w-5" />
@@ -198,8 +198,8 @@ export function ProjectClient({ projectId }: { projectId: string }) {
               onClick={() => setActiveView('scenes')}
               className={`px-4 py-2 rounded-lg transition ${
                 activeView === 'scenes'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground hover:text-foreground'
               }`}
             >
               <Grid3x3 className="h-5 w-5" />
@@ -214,16 +214,16 @@ export function ProjectClient({ projectId }: { projectId: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Chat Area */}
             <div className="lg:col-span-2">
-              <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6 h-[calc(100vh-250px)] flex flex-col">
+              <div className="bg-white backdrop-blur-sm rounded-2xl border border-border p-6 h-[calc(100vh-250px)] flex flex-col shadow-sm">
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto space-y-6 mb-6">
                   {messages?.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
-                      <MessageSquare className="h-16 w-16 text-slate-600 mb-4" />
-                      <h3 className="text-xl font-semibold text-slate-400 mb-2">
+                      <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
+                      <h3 className="text-xl font-semibold text-foreground mb-2">
                         Start a conversation
                       </h3>
-                      <p className="text-slate-500 max-w-md">
+                      <p className="text-muted-foreground max-w-md">
                         Ask me to help you plan scenes, generate storyboards, create characters, or
                         refine your creative vision.
                       </p>
@@ -234,7 +234,7 @@ export function ProjectClient({ projectId }: { projectId: string }) {
                     ))
                   )}
                   {sending && messages[messages.length - 1]?.role === 'user' && (
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span className="text-sm">Thinking...</span>
                     </div>
@@ -251,12 +251,12 @@ export function ProjectClient({ projectId }: { projectId: string }) {
                     placeholder="Ask me anything about your project..."
                     disabled={sending}
                     rows={3}
-                    className="w-full px-4 py-3 pr-12 bg-slate-800/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-slate-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 pr-12 bg-background border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder-muted-foreground resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <button
                     onClick={sendMessage}
                     disabled={!input?.trim() || sending}
-                    className="absolute right-3 bottom-3 p-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute right-3 bottom-3 p-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? (
                       <Loader2 className="h-5 w-5 animate-spin" />

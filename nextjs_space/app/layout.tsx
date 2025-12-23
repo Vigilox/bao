@@ -6,14 +6,14 @@ import { Providers } from '@/components/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'BAO - AI Creative Studio',
+  title: 'BAO - AI Creative Platform',
   description: 'Transform your creative vision into cinema-grade content with AI',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
   openGraph: {
-    title: 'BAO - AI Creative Studio',
+    title: 'BAO - AI Creative Platform',
     description: 'Transform your creative vision into cinema-grade content with AI',
     images: ['/og-image.png'],
   },

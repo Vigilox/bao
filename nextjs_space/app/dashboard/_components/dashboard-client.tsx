@@ -85,7 +85,7 @@ export function DashboardClient() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="relative w-10 h-10">
+            <div className="relative w-14 h-14">
               <Image
                 src="/logo.png"
                 alt="BAO Logo"
@@ -93,7 +93,7 @@ export function DashboardClient() {
                 className="object-contain"
               />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">BAO Studio</h1>
+            <h1 className="text-2xl font-bold text-foreground">BAO</h1>
           </Link>
 
           <div className="flex items-center gap-4">

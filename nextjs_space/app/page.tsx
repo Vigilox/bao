@@ -15,7 +15,7 @@ export default async function HomePage() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-12 h-12">
+              <div className="relative w-16 h-16">
                 <Image
                   src="/logo.png"
                   alt="BAO Logo"
@@ -29,7 +29,7 @@ export default async function HomePage() {
             {/* Navigation Links */}
             <div className="hidden md:flex items-center gap-8">
               <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
-                Studio
+                Dashboard
               </Link>
               <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
                 Features
@@ -43,7 +43,7 @@ export default async function HomePage() {
                   href="/dashboard"
                   className="px-6 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition shadow-lg shadow-primary/25"
                 >
-                  Go to Studio
+                  Go to Dashboard
                 </Link>
               ) : (
                 <>
@@ -73,7 +73,7 @@ export default async function HomePage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary rounded-full text-sm font-medium text-secondary-foreground mb-8">
               <Sparkles className="h-4 w-4" />
-              AI-Powered Creative Studio
+              AI-Powered Creative Platform
             </div>
 
             {/* Main Headline - Bold Blue */}
@@ -98,7 +98,7 @@ export default async function HomePage() {
                 href={session ? "/dashboard" : "/auth/signup"}
                 className="group px-8 py-4 bg-primary text-primary-foreground font-semibold text-lg rounded-xl hover:bg-primary/90 transition shadow-2xl shadow-primary/30 flex items-center gap-2"
               >
-                {session ? "Go to Studio" : "Try Studio"}
+                {session ? "Go to Dashboard" : "Get Started"}
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition" />
               </Link>
             </div>
@@ -175,7 +175,7 @@ export default async function HomePage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <span className="text-xl font-bold text-foreground">BAO</span>
             <p className="text-muted-foreground text-sm">
-              © 2024 BAO. AI-native creative studio.
+              © 2024 BAO. AI-native creative platform.
             </p>
           </div>
         </div>

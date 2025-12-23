@@ -73,7 +73,7 @@ export default function SignUpPage() {
         <div className="bg-white backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-border">
           <div className="flex items-center justify-center mb-8">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-12 h-12">
+              <div className="relative w-16 h-16">
                 <Image
                   src="/logo.png"
                   alt="BAO Logo"

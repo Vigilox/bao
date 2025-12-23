@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, Video, Image as ImageIcon, Zap } from 'lucide-react';
+import { ArrowRight, Sparkles, Video, Image as ImageIcon, Zap, Palette } from 'lucide-react';
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
@@ -126,7 +126,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Feature 1 */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-border hover:shadow-xl transition">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
@@ -136,7 +136,7 @@ export default async function HomePage() {
                 AI Image Generation
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Create stunning visuals with Nano Banana. Generate character art, storyboards, and concept designs through simple conversation.
+                Create stunning visuals with Nano Banana. Generate character art, storyboards, and concept designs.
               </p>
             </div>
 
@@ -149,17 +149,30 @@ export default async function HomePage() {
                 Video Generation
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Transform your ideas into professional video content. Text-to-video and image-to-video with cinematic quality.
+                Transform your ideas into professional video content with cinematic quality.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-border hover:shadow-xl transition">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                <Palette className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">
+                Design Tool
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Professional design canvas with layers, smart guides, and powerful editing tools for creating stunning visuals.
+              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-border hover:shadow-xl transition">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-2xl font-semibold text-foreground mb-4">
-                Smart Project Management
+                Project Management
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 Organize your creative work with projects, scenes, and shots. Upload references and let AI understand your vision.

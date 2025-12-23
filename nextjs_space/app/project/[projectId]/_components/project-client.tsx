@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { ChatMessage } from './chat-message';
 import { ArtifactPanel } from './artifact-panel';
 import { SceneList } from './scene-list';
+import { ArtboardsList } from './artboards-list';
 
 interface Project {
   id: string;
@@ -40,7 +41,7 @@ export function ProjectClient({ projectId }: { projectId: string }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [showArtifacts, setShowArtifacts] = useState(false);
-  const [activeView, setActiveView] = useState<'chat' | 'scenes' | 'assets'>('chat');
+  const [activeView, setActiveView] = useState<'chat' | 'scenes' | 'artboards'>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -186,23 +187,41 @@ export function ProjectClient({ projectId }: { projectId: string }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveView('chat')}
-              className={`px-4 py-2 rounded-lg transition ${
+              className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
                 activeView === 'chat'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-muted-foreground hover:text-foreground'
               }`}
+              title="Chat"
             >
               <MessageSquare className="h-5 w-5" />
+              <span className="text-sm hidden md:inline">Chat</span>
             </button>
             <button
               onClick={() => setActiveView('scenes')}
-              className={`px-4 py-2 rounded-lg transition ${
+              className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
                 activeView === 'scenes'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-muted-foreground hover:text-foreground'
               }`}
+              title="Scenes"
             >
               <Grid3x3 className="h-5 w-5" />
+              <span className="text-sm hidden md:inline">Scenes</span>
+            </button>
+            <button
+              onClick={() => setActiveView('artboards')}
+              className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
+                activeView === 'artboards'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground hover:text-foreground'
+              }`}
+              title="Artboards"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+              </svg>
+              <span className="text-sm hidden md:inline">Artboards</span>
             </button>
           </div>
         </div>
@@ -275,6 +294,8 @@ export function ProjectClient({ projectId }: { projectId: string }) {
           </div>
         ) : activeView === 'scenes' ? (
           <SceneList projectId={projectId} scenes={project?.scenes || []} />
+        ) : activeView === 'artboards' ? (
+          <ArtboardsList projectId={projectId} />
         ) : null}
       </div>
     </div>

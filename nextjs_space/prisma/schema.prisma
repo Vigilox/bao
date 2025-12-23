@@ -81,6 +81,8 @@ model Project {
   chatMessages     ChatMessage[]
   generationTasks  GenerationTask[]
   assets           Asset[]
+  artboards        Artboard[]
+  artboardSnapshots ArtboardSnapshot[]
 
   @@index([userId])
   @@map("projects")
@@ -211,4 +213,39 @@ model GenerationTask {
   @@index([taskId])
   @@index([status])
   @@map("generation_tasks")
+}
+
+// Design Tool Models
+model Artboard {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  description String?  @db.Text
+  widthPx     Int      @default(800)
+  heightPx    Int      @default(600)
+  data        Json     // Canvas objects state
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  snapshots ArtboardSnapshot[]
+
+  @@index([projectId])
+  @@map("artboards")
+}
+
+model ArtboardSnapshot {
+  id         String   @id @default(cuid())
+  artboardId String
+  projectId  String
+  name       String
+  data       Json     // Snapshot of canvas state
+  createdAt  DateTime @default(now())
+
+  artboard Artboard @relation(fields: [artboardId], references: [id], onDelete: Cascade)
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([artboardId])
+  @@index([projectId])
+  @@map("artboard_snapshots")
 }

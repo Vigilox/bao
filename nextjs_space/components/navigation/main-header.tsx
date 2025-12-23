@@ -3,23 +3,25 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSession, signOut } from 'next-auth/react';
-import { ChevronDown, Bell, HelpCircle, Menu, LogOut, User, Settings } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { ChevronDown, Bell, HelpCircle, Menu } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { StudioMegaMenu } from './studio-megamenu';
 import { TemplatesMegaMenu } from './templates-megamenu';
 import { ResourcesMegaMenu } from './resources-megamenu';
 import { AccountMegaMenu } from './account-megamenu';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 type MegaMenuType = 'studio' | 'templates' | 'resources' | 'account' | null;
+
+// Helper function to format user name (e.g., "John Doe" -> "John D.")
+function formatUserName(name?: string | null): string {
+  if (!name) return 'User';
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) return parts[0];
+  const firstName = parts[0];
+  const lastInitial = parts[parts.length - 1][0];
+  return `${firstName} ${lastInitial}.`;
+}
 
 export function MainHeader() {
   const { data: session } = useSession() || {};
@@ -32,10 +34,6 @@ export function MainHeader() {
 
   const handleMouseLeave = () => {
     setActiveMegaMenu(null);
-  };
-
-  const handleSignOut = async () => {
-    await signOut({ redirect: true, callbackUrl: '/auth/signin' });
   };
 
   return (
@@ -164,48 +162,19 @@ export function MainHeader() {
               <Menu className="h-6 w-6" />
             </button>
 
-            {/* Auth Buttons / User Profile */}
+            {/* Auth Buttons / User Profile Badge */}
             {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors">
-                    <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-medium text-sm">
-                      {session?.user?.name?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                    <div className="hidden md:block text-left">
-                      <div className="text-sm font-medium text-gray-900">
-                        {session?.user?.name || 'User'}
-                      </div>
-                      <div className="text-xs text-gray-500">Free Plan</div>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-gray-600" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div>
-                      <div className="font-medium">{session?.user?.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {session?.user?.email}
-                      </div>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Preferences</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-default"
+                title="For account settings, use My Account menu"
+              >
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-medium text-sm">
+                  {session?.user?.name?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <div className="hidden md:block text-sm font-medium text-gray-900">
+                  {formatUserName(session?.user?.name)}
+                </div>
+              </div>
             ) : (
               <div className="hidden lg:flex items-center gap-3">
                 <Link

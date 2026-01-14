@@ -304,7 +304,23 @@ export function VideoGallery({ projectId, autoRefresh = true, onTaskUpdate }: Vi
                       <div className="flex flex-wrap gap-2 text-xs">
                         <Badge variant="outline">{task.parameters?.aspectRatio || '16:9'}</Badge>
                         <Badge variant="outline">{task.parameters?.duration || 5}s</Badge>
-                        <Badge variant="outline">{task.model}</Badge>
+                        <Badge 
+                          variant="outline"
+                          className={
+                            task.model === 'sora2-pro' 
+                              ? 'bg-gradient-to-r from-violet-100 to-purple-100 border-violet-300 text-violet-700' 
+                              : task.model === 'sora2'
+                              ? 'bg-violet-50 border-violet-200 text-violet-600'
+                              : ''
+                          }
+                        >
+                          {task.model === 'veo3-fast' ? 'Veo 3.1' : 
+                           task.model === 'sora2' ? 'Sora 2' : 
+                           task.model === 'sora2-pro' ? 'Sora 2 Pro' : task.model}
+                        </Badge>
+                        {task.parameters?.quality === 'High' && (
+                          <Badge variant="outline" className="bg-amber-50 border-amber-200 text-amber-700">HD</Badge>
+                        )}
                       </div>
 
                       {/* Error Message */}

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -24,6 +25,8 @@ import {
   X,
   Info,
   Sparkles,
+  Zap,
+  Crown,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -33,6 +36,13 @@ interface VideoGenerationPanelProps {
 }
 
 type AspectRatio = '16:9' | '9:16' | '1:1' | '4:3' | '3:4';
+type VideoModel = 'veo3' | 'sora2' | 'sora2-pro';
+
+const VIDEO_MODELS: { value: VideoModel; label: string; description: string; badge?: string; icon: any }[] = [
+  { value: 'veo3', label: 'Veo 3.1', description: 'Google DeepMind - Fast & reliable', icon: Zap },
+  { value: 'sora2', label: 'Sora 2', description: 'OpenAI - Cinematic quality (720p)', icon: Film },
+  { value: 'sora2-pro', label: 'Sora 2 Pro', description: 'OpenAI - HD quality (1080p)', badge: 'PRO', icon: Crown },
+];
 
 const ASPECT_RATIOS: { value: AspectRatio; label: string; description: string }[] = [
   { value: '16:9', label: '16:9', description: 'Landscape (YouTube, TV)' },
@@ -59,6 +69,28 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // New Sora 2 state
+  const [videoModel, setVideoModel] = useState<VideoModel>('veo3');
+  const [removeWatermark, setRemoveWatermark] = useState(false);
+  
+  // Get duration limits based on model
+  const getDurationLimits = () => {
+    if (videoModel === 'veo3') return { min: 5, max: 10 };
+    if (videoModel === 'sora2') return { min: 10, max: 10 };
+    return { min: 10, max: 15 }; // sora2-pro
+  };
+  
+  const durationLimits = getDurationLimits();
+  
+  // Adjust duration when model changes
+  const handleModelChange = (model: VideoModel) => {
+    setVideoModel(model);
+    const limits = model === 'veo3' ? { min: 5, max: 10 } : 
+                   model === 'sora2' ? { min: 10, max: 10 } : { min: 10, max: 15 };
+    if (duration < limits.min) setDuration(limits.min);
+    if (duration > limits.max) setDuration(limits.max);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -169,6 +201,10 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
           aspectRatio,
           duration,
           imageUrl,
+          // Sora 2 parameters
+          videoModel,
+          quality: videoModel === 'sora2-pro' ? 'High' : 'Standard',
+          removeWatermark: videoModel.startsWith('sora2') ? removeWatermark : undefined,
         }),
       });
 
@@ -205,6 +241,8 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
     setPrompt(examplePrompt);
   };
 
+  const selectedModelInfo = VIDEO_MODELS.find(m => m.value === videoModel);
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -213,14 +251,51 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
             <Film className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle>Generate Video with Veo 3.1</CardTitle>
+            <CardTitle>AI Video Generation</CardTitle>
             <CardDescription>
-              Create cinema-quality videos from text or images using state-of-the-art AI
+              Create cinema-quality videos from text or images using Veo 3.1 or Sora 2
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Model Selection */}
+        <div className="space-y-3">
+          <Label>AI Model</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {VIDEO_MODELS.map((model) => {
+              const IconComponent = model.icon;
+              const isSelected = videoModel === model.value;
+              return (
+                <button
+                  key={model.value}
+                  onClick={() => handleModelChange(model.value)}
+                  className={`relative p-4 rounded-lg border-2 text-left transition-all ${
+                    isSelected
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted hover:border-primary/50 hover:bg-accent/5'
+                  }`}
+                >
+                  {model.badge && (
+                    <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-1.5 py-0.5">
+                      {model.badge}
+                    </Badge>
+                  )}
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <IconComponent className={`h-5 w-5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <p className={`font-medium ${isSelected ? 'text-primary' : ''}`}>{model.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{model.description}</p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Generation Mode Tabs */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
           <TabsList className="grid w-full grid-cols-2">
@@ -358,18 +433,63 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
               <Label htmlFor="duration">Duration</Label>
               <Badge variant="secondary">{duration}s</Badge>
             </div>
-            <Slider
-              id="duration"
-              min={5}
-              max={10}
-              step={1}
-              value={[duration]}
-              onValueChange={(v) => setDuration(v[0])}
-              className="w-full"
-            />
-            <p className="text-xs text-muted-foreground">5-10 seconds</p>
+            {durationLimits.min === durationLimits.max ? (
+              <div className="h-9 flex items-center">
+                <Badge variant="outline" className="text-sm">{durationLimits.min}s (fixed)</Badge>
+              </div>
+            ) : (
+              <Slider
+                id="duration"
+                min={durationLimits.min}
+                max={durationLimits.max}
+                step={1}
+                value={[duration]}
+                onValueChange={(v) => setDuration(v[0])}
+                className="w-full"
+              />
+            )}
+            <p className="text-xs text-muted-foreground">
+              {durationLimits.min === durationLimits.max 
+                ? `Fixed ${durationLimits.min}s for ${selectedModelInfo?.label}`
+                : `${durationLimits.min}-${durationLimits.max} seconds`
+              }
+            </p>
           </div>
         </div>
+
+        {/* Sora 2 Specific Options */}
+        {videoModel.startsWith('sora2') && (
+          <div className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-lg space-y-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-600" />
+              <span className="text-sm font-medium text-violet-900">Sora 2 Options</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="watermark" className="text-sm font-medium text-violet-900">Remove Watermark</Label>
+                <p className="text-xs text-violet-600">Generate clean video without Sora watermark</p>
+              </div>
+              <Switch
+                id="watermark"
+                checked={removeWatermark}
+                onCheckedChange={setRemoveWatermark}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-violet-200">
+              <Badge variant="outline" className="bg-white text-violet-700 border-violet-300">
+                {videoModel === 'sora2-pro' ? '1080p HD' : '720p'}
+              </Badge>
+              <Badge variant="outline" className="bg-white text-violet-700 border-violet-300">
+                Synced Audio
+              </Badge>
+              <Badge variant="outline" className="bg-white text-violet-700 border-violet-300">
+                Realistic Physics
+              </Badge>
+            </div>
+          </div>
+        )}
 
         {/* Info Banner */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -378,7 +498,13 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
             <div className="space-y-1">
               <p className="text-sm font-medium text-blue-900">Generation Time</p>
               <p className="text-xs text-blue-700">
-                Video generation typically takes 2-5 minutes. You'll be notified when it's ready.
+                {videoModel === 'veo3' 
+                  ? 'Veo 3.1 generation typically takes 2-5 minutes.'
+                  : videoModel === 'sora2'
+                  ? 'Sora 2 generation typically takes 3-8 minutes for 720p videos.'
+                  : 'Sora 2 Pro generation may take 5-12 minutes for HD 1080p videos.'
+                }
+                {' '}You'll be notified when it's ready.
               </p>
             </div>
           </div>
@@ -388,18 +514,22 @@ export function VideoGenerationPanel({ projectId, onVideoGenerated }: VideoGener
         <Button
           onClick={handleGenerate}
           disabled={isGenerating || !prompt.trim()}
-          className="w-full h-12 text-base"
+          className={`w-full h-12 text-base ${
+            videoModel.startsWith('sora2') 
+              ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700' 
+              : ''
+          }`}
           size="lg"
         >
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Generating Video...
+              Generating with {selectedModelInfo?.label}...
             </>
           ) : (
             <>
-              <Film className="mr-2 h-5 w-5" />
-              Generate Video
+              {selectedModelInfo?.icon && <selectedModelInfo.icon className="mr-2 h-5 w-5" />}
+              Generate with {selectedModelInfo?.label}
             </>
           )}
         </Button>

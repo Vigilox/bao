@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TipButton } from '@/components/monetization';
 
 interface Profile {
   id: string;
@@ -41,6 +42,10 @@ interface Profile {
   isVerified: boolean;
   totalViews: number;
   createdAt: string;
+  // Monetization
+  acceptsTips: boolean;
+  minimumTip: number;
+  tipMessage: string | null;
   user: {
     id: string;
     name: string;
@@ -280,6 +285,14 @@ export default function CreatorProfilePage() {
                   <><UserPlus className="w-4 h-4 mr-2" /> Follow</>
                 )}
               </Button>
+              {profile.acceptsTips && (
+                <TipButton
+                  creatorUsername={profile.username}
+                  creatorDisplayName={profile.displayName || profile.user.name}
+                  minimumTip={profile.minimumTip}
+                  tipMessage={profile.tipMessage}
+                />
+              )}
             </div>
           )}
           {profile.isOwnProfile && (

@@ -26,6 +26,7 @@ import {
   ExternalLink,
   Play,
   Trash2,
+  DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
 import { SiteNavigation } from '@/components/navigation/site-navigation';
@@ -35,6 +36,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { EarningsPanel } from '@/components/monetization';
 
 interface Project {
   id: string;
@@ -383,7 +385,7 @@ export function DashboardClient() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+            <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
               <TabsTrigger value="projects" className="gap-2">
                 <FolderOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">Projects</span>
@@ -395,6 +397,10 @@ export function DashboardClient() {
               <TabsTrigger value="saved" className="gap-2">
                 <Bookmark className="w-4 h-4" />
                 <span className="hidden sm:inline">Saved</span>
+              </TabsTrigger>
+              <TabsTrigger value="earnings" className="gap-2">
+                <DollarSign className="w-4 h-4" />
+                <span className="hidden sm:inline">Earnings</span>
               </TabsTrigger>
               <TabsTrigger value="notifications" className="gap-2 relative">
                 <Bell className="w-4 h-4" />
@@ -567,6 +573,11 @@ export function DashboardClient() {
                   </Button>
                 </Link>
               </div>
+            </TabsContent>
+
+            {/* Earnings Tab */}
+            <TabsContent value="earnings">
+              <EarningsPanel />
             </TabsContent>
 
             {/* Notifications Tab */}

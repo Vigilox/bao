@@ -20,10 +20,43 @@ async function main() {
       email: 'john@doe.com',
       password: hashedPassword,
       name: 'John Doe',
+      role: 'USER',
     },
   });
 
   console.log('✅ Test user created:', testUser.email);
+
+  // Create admin user (admin@bao.ai / BaoAdmin2024!)
+  const adminPassword = await bcrypt.hash('BaoAdmin2024!', 12);
+  
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@bao.ai' },
+    update: { role: 'ADMIN' },
+    create: {
+      email: 'admin@bao.ai',
+      password: adminPassword,
+      name: 'BAO Admin',
+      role: 'ADMIN',
+    },
+  });
+
+  console.log('✅ Admin user created:', adminUser.email);
+
+  // Create super admin user (superadmin@bao.ai / BaoSuper2024!)
+  const superAdminPassword = await bcrypt.hash('BaoSuper2024!', 12);
+  
+  const superAdminUser = await prisma.user.upsert({
+    where: { email: 'superadmin@bao.ai' },
+    update: { role: 'SUPER_ADMIN' },
+    create: {
+      email: 'superadmin@bao.ai',
+      password: superAdminPassword,
+      name: 'BAO Super Admin',
+      role: 'SUPER_ADMIN',
+    },
+  });
+
+  console.log('✅ Super Admin user created:', superAdminUser.email);
 
   // Create a sample project
   const sampleProject = await prisma.project.upsert({
@@ -92,9 +125,16 @@ async function main() {
   console.log('✅ Sample shots created');
 
   console.log('\n🎉 Database seed completed!');
-  console.log('\n📝 Test account credentials:');
-  console.log('   Email: john@doe.com');
-  console.log('   Password: johndoe123');
+  console.log('\n📝 Account Credentials:');
+  console.log('\n   👤 Regular User:');
+  console.log('      Email: john@doe.com');
+  console.log('      Password: johndoe123');
+  console.log('\n   🔑 Admin User:');
+  console.log('      Email: admin@bao.ai');
+  console.log('      Password: BaoAdmin2024!');
+  console.log('\n   👑 Super Admin:');
+  console.log('      Email: superadmin@bao.ai');
+  console.log('      Password: BaoSuper2024!');
 }
 
 main()

@@ -26,6 +26,9 @@ import {
   ImageIcon,
   CheckCircle,
   Send,
+  Star,
+  Hash,
+  Flame,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +36,26 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
+interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+  color: string | null;
+  icon: string | null;
+  postCount: number;
+  isFeatured: boolean;
+}
+
+interface PostTag {
+  tag: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string | null;
+  };
+}
 
 interface Post {
   id: string;
@@ -44,6 +67,8 @@ interface Post {
   prompt: string | null;
   modelUsed: string | null;
   tags: string[];
+  postTags?: PostTag[];
+  isFeatured?: boolean;
   viewCount: number;
   createdAt: string;
   user: {
@@ -94,11 +119,14 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams();
   
   const [posts, setPosts] = useState<Post[]>([]);
+  const [featuredPosts, setFeaturedPosts] = useState<Post[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [feedType, setFeedType] = useState<'discover' | 'following' | 'trending'>('discover');
+  const [feedType, setFeedType] = useState<'discover' | 'following' | 'trending' | 'featured'>('discover');
   const [mediaFilter, setMediaFilter] = useState<'all' | 'image' | 'video'>('all');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -107,6 +135,12 @@ export default function DiscoverPage() {
   
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Fetch tags on mount
+  useEffect(() => {
+    fetchTags();
+    fetchFeaturedPosts();
+  }, []);
 
   // Check for post param in URL
   useEffect(() => {
@@ -119,7 +153,27 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     fetchPosts(true);
-  }, [feedType, mediaFilter, searchQuery]);
+  }, [feedType, mediaFilter, searchQuery, selectedTag]);
+
+  const fetchTags = async () => {
+    try {
+      const res = await fetch('/api/tags?limit=20');
+      const data = await res.json();
+      setTags(data.tags || []);
+    } catch (error) {
+      console.error('Failed to fetch tags:', error);
+    }
+  };
+
+  const fetchFeaturedPosts = async () => {
+    try {
+      const res = await fetch('/api/feed?type=featured&limit=6');
+      const data = await res.json();
+      setFeaturedPosts(data.posts || []);
+    } catch (error) {
+      console.error('Failed to fetch featured posts:', error);
+    }
+  };
 
   useEffect(() => {
     if (selectedPost) {
@@ -160,6 +214,7 @@ export default function DiscoverPage() {
       params.set('type', feedType);
       if (mediaFilter !== 'all') params.set('mediaType', mediaFilter);
       if (searchQuery) params.set('search', searchQuery);
+      if (selectedTag) params.set('tag', selectedTag);
       if (!reset && nextCursor) params.set('cursor', nextCursor);
 
       const res = await fetch(`/api/feed?${params.toString()}`);
@@ -319,7 +374,10 @@ export default function DiscoverPage() {
                   <Compass className="w-4 h-4" /> Discover
                 </TabsTrigger>
                 <TabsTrigger value="trending" className="gap-1.5">
-                  <TrendingUp className="w-4 h-4" /> Trending
+                  <Flame className="w-4 h-4" /> Trending
+                </TabsTrigger>
+                <TabsTrigger value="featured" className="gap-1.5">
+                  <Star className="w-4 h-4" /> Featured
                 </TabsTrigger>
                 {session?.user && (
                   <TabsTrigger value="following" className="gap-1.5">
@@ -353,11 +411,115 @@ export default function DiscoverPage() {
               </Button>
             </div>
           </div>
+
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="mt-3 -mx-4 px-4">
+              <ScrollArea className="w-full whitespace-nowrap">
+                <div className="flex gap-2 pb-2">
+                  <Button
+                    variant={selectedTag === null ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedTag(null)}
+                    className="flex-shrink-0"
+                  >
+                    <Hash className="w-3.5 h-3.5 mr-1" /> All Tags
+                  </Button>
+                  {tags.map((tag) => (
+                    <Button
+                      key={tag.id}
+                      variant={selectedTag === tag.slug ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedTag(selectedTag === tag.slug ? null : tag.slug)}
+                      className="flex-shrink-0"
+                      style={selectedTag === tag.slug && tag.color ? { backgroundColor: tag.color, borderColor: tag.color } : {}}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full mr-1.5"
+                        style={{ backgroundColor: tag.color || '#888' }}
+                      />
+                      {tag.name}
+                      {tag.postCount > 0 && (
+                        <span className="ml-1 text-xs opacity-60">({tag.postCount})</span>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Featured Section - Show on discover tab when no tag selected */}
+        {feedType === 'discover' && !selectedTag && featuredPosts.length > 0 && !loading && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+              <h2 className="text-xl font-semibold">Featured Creations</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {featuredPosts.slice(0, 6).map((post) => (
+                <motion.div
+                  key={post.id}
+                  whileHover={{ scale: 1.02 }}
+                  className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group"
+                  onClick={() => {
+                    setSelectedPost(post);
+                    router.push(`/discover?post=${post.id}`, { scroll: false });
+                  }}
+                >
+                  {post.mediaType === 'video' ? (
+                    <video src={post.mediaUrl} className="w-full h-full object-cover" muted />
+                  ) : (
+                    <Image src={post.mediaUrl} alt="" fill className="object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-2 left-2 right-2">
+                      <div className="flex items-center gap-1.5">
+                        <Avatar className="w-5 h-5 border border-white/50">
+                          <AvatarImage src={post.user.profile?.avatarUrl || ''} />
+                          <AvatarFallback className="text-xs">{post.user.name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-white text-xs font-medium truncate">
+                          {post.user.profile?.displayName || post.user.name}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Featured badge */}
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-yellow-500/90 text-white text-xs border-0">
+                      <Star className="w-3 h-3 mr-1 fill-white" /> Featured
+                    </Badge>
+                  </div>
+                  {post.mediaType === 'video' && (
+                    <div className="absolute top-2 right-2 bg-black/60 rounded p-1">
+                      <Play className="w-3 h-3 text-white fill-white" />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Active Filter Info */}
+        {selectedTag && (
+          <div className="flex items-center gap-2 mb-4 p-3 bg-muted/50 rounded-lg">
+            <Hash className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm">
+              Showing posts tagged with <strong>{tags.find(t => t.slug === selectedTag)?.name || selectedTag}</strong>
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => setSelectedTag(null)} className="ml-auto">
+              <X className="w-4 h-4" /> Clear
+            </Button>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />

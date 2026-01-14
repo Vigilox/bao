@@ -87,6 +87,38 @@ async function main() {
 
   console.log('✅ Creator profiles created');
 
+  // Create default tags for content categorization
+  const defaultTags = [
+    { name: 'Sci-Fi', slug: 'sci-fi', color: '#6366f1', icon: 'rocket', description: 'Science fiction and futuristic content' },
+    { name: 'Fantasy', slug: 'fantasy', color: '#8b5cf6', icon: 'wand', description: 'Fantasy and magical worlds' },
+    { name: 'Portrait', slug: 'portrait', color: '#ec4899', icon: 'user', description: 'Character portraits and faces' },
+    { name: 'Landscape', slug: 'landscape', color: '#10b981', icon: 'mountain', description: 'Nature and environment scenes' },
+    { name: 'Abstract', slug: 'abstract', color: '#f59e0b', icon: 'shapes', description: 'Abstract and artistic designs' },
+    { name: 'Anime', slug: 'anime', color: '#ef4444', icon: 'sparkles', description: 'Anime and manga style art' },
+    { name: 'Realistic', slug: 'realistic', color: '#3b82f6', icon: 'camera', description: 'Photorealistic and hyperreal content' },
+    { name: 'Cinematic', slug: 'cinematic', color: '#1f2937', icon: 'film', description: 'Movie-quality cinematography' },
+    { name: 'Product', slug: 'product', color: '#06b6d4', icon: 'package', description: 'Product shots and commercials' },
+    { name: 'Architecture', slug: 'architecture', color: '#64748b', icon: 'building', description: 'Buildings and architectural designs' },
+    { name: 'Fashion', slug: 'fashion', color: '#d946ef', icon: 'shirt', description: 'Fashion and style content' },
+    { name: 'Food', slug: 'food', color: '#f97316', icon: 'utensils', description: 'Food photography and culinary art' },
+    { name: 'Music Video', slug: 'music-video', color: '#a855f7', icon: 'music', description: 'Music videos and visualizers' },
+    { name: 'Tutorial', slug: 'tutorial', color: '#22c55e', icon: 'book', description: 'Tutorials and educational content' },
+    { name: 'Meme', slug: 'meme', color: '#fbbf24', icon: 'laugh', description: 'Memes and humor' },
+  ];
+
+  for (const tag of defaultTags) {
+    await prisma.tag.upsert({
+      where: { slug: tag.slug },
+      update: {},
+      create: {
+        ...tag,
+        isFeatured: ['sci-fi', 'portrait', 'cinematic', 'anime', 'realistic'].includes(tag.slug),
+      },
+    });
+  }
+
+  console.log('✅ Default tags created');
+
   // Create a sample project
   const sampleProject = await prisma.project.upsert({
     where: { id: 'sample-project-1' },

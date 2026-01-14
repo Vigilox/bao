@@ -89,7 +89,9 @@ model Post {
   tags             String[] @default([])
   isPublic         Boolean  @default(true)
   isFeatured       Boolean  @default(false)
+  featuredAt       DateTime? // When it was featured
   viewCount        Int      @default(0)
+  trendingScore    Float    @default(0) // Calculated trending score
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -97,11 +99,48 @@ model Post {
   likes     Like[]
   comments  Comment[]
   savedBy   SavedPost[]
+  postTags  PostTag[]
 
   @@index([userId])
   @@index([isPublic, createdAt])
   @@index([isFeatured])
+  @@index([trendingScore(sort: Desc)])
   @@map("posts")
+}
+
+// Tags for content categorization
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String?  // Hex color for UI
+  icon        String?  // Icon name
+  postCount   Int      @default(0)
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts PostTag[]
+
+  @@index([slug])
+  @@index([postCount(sort: Desc)])
+  @@map("tags")
+}
+
+// Junction table for Post-Tag many-to-many
+model PostTag {
+  id        String   @id @default(cuid())
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([tagId])
+  @@map("post_tags")
 }
 
 // Likes on Posts

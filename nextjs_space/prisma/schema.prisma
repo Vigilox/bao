@@ -33,8 +33,160 @@ model User {
   accounts Account[]
   sessions Session[]
   projects Project[]
+  
+  // UGC Social Features
+  profile           CreatorProfile?
+  posts             Post[]
+  likes             Like[]
+  comments          Comment[]
+  savedPosts        SavedPost[]
+  following         Follow[]         @relation("follower")
+  followers         Follow[]         @relation("following")
+  notifications     Notification[]   @relation("recipient")
+  triggeredNotifs   Notification[]   @relation("actor")
 
   @@map("users")
+}
+
+// Creator Profile for UGC
+model CreatorProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  username      String   @unique
+  displayName   String?
+  bio           String?  @db.Text
+  avatarUrl     String?
+  bannerUrl     String?
+  website       String?
+  location      String?
+  socialLinks   Json?    // { twitter, instagram, youtube, tiktok, etc. }
+  isVerified    Boolean  @default(false)
+  isPublic      Boolean  @default(true)
+  totalViews    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([username])
+  @@map("creator_profiles")
+}
+
+// Published Content Posts
+model Post {
+  id               String   @id @default(cuid())
+  userId           String
+  title            String?
+  caption          String?  @db.Text
+  mediaType        String   // 'image', 'video'
+  mediaUrl         String
+  thumbnailUrl     String?
+  cloudStoragePath String?
+  prompt           String?  @db.Text
+  modelUsed        String?  // 'nano-banana', 'veo3', 'sora2', etc.
+  aspectRatio      String?
+  duration         Float?   // For videos, in seconds
+  tags             String[] @default([])
+  isPublic         Boolean  @default(true)
+  isFeatured       Boolean  @default(false)
+  viewCount        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes     Like[]
+  comments  Comment[]
+  savedBy   SavedPost[]
+
+  @@index([userId])
+  @@index([isPublic, createdAt])
+  @@index([isFeatured])
+  @@map("posts")
+}
+
+// Likes on Posts
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@map("likes")
+}
+
+// Comments on Posts
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  content   String   @db.Text
+  parentId  String?  // For nested replies
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([userId])
+  @@map("comments")
+}
+
+// Saved/Bookmarked Posts
+model SavedPost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@map("saved_posts")
+}
+
+// Follow Relationships
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+// Notifications
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // Recipient
+  actorId   String?  // Who triggered it
+  type      String   // 'like', 'comment', 'follow', 'mention', 'feature'
+  postId    String?  // Related post if applicable
+  message   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  User  @relation("recipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("actor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }
 
 model Account {

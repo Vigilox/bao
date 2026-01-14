@@ -58,6 +58,35 @@ async function main() {
 
   console.log('✅ Super Admin user created:', superAdminUser.email);
 
+  // Create profiles for users
+  const testProfile = await prisma.creatorProfile.upsert({
+    where: { userId: testUser.id },
+    update: {},
+    create: {
+      userId: testUser.id,
+      username: 'johndoe',
+      displayName: 'John Doe',
+      bio: 'AI content creator and digital artist. Exploring the future of creative media.',
+      location: 'San Francisco, CA',
+      website: 'https://johndoe.com',
+      socialLinks: { twitter: 'johndoe', instagram: 'johndoe_art' },
+    },
+  });
+
+  const adminProfile = await prisma.creatorProfile.upsert({
+    where: { userId: adminUser.id },
+    update: {},
+    create: {
+      userId: adminUser.id,
+      username: 'baoadmin',
+      displayName: 'BAO Admin',
+      bio: 'Official BAO platform administrator.',
+      isVerified: true,
+    },
+  });
+
+  console.log('✅ Creator profiles created');
+
   // Create a sample project
   const sampleProject = await prisma.project.upsert({
     where: { id: 'sample-project-1' },

@@ -50,6 +50,15 @@ model User {
   transactions      Transaction[]
   withdrawals       Withdrawal[]
   contentPurchases  ContentPurchase[]
+  
+  // Community Features
+  sentMessages      DirectMessage[]       @relation("sentMessages")
+  receivedMessages  DirectMessage[]       @relation("receivedMessages")
+  conversations1    Conversation[]        @relation("conversations1")
+  conversations2    Conversation[]        @relation("conversations2")
+  challengeSubmissions ChallengeSubmission[] @relation("challengeSubmissions")
+  forumThreads      ForumThread[]         @relation("forumThreads")
+  forumReplies      ForumReply[]          @relation("forumReplies")
 
   @@map("users")
 }
@@ -81,6 +90,7 @@ model CreatorProfile {
   user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   stripeAccount  StripeConnectAccount?
   tipsReceived   Tip[]                 @relation("tipRecipient")
+  analytics      CreatorAnalytics[]
 
   @@index([username])
   @@map("creator_profiles")
@@ -109,13 +119,15 @@ model Post {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  likes          Like[]
-  comments       Comment[]
-  savedBy        SavedPost[]
-  postTags       PostTag[]
-  tips           Tip[]
-  premiumContent PremiumContent?
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes             Like[]
+  comments          Comment[]
+  savedBy           SavedPost[]
+  postTags          PostTag[]
+  tips              Tip[]
+  premiumContent    PremiumContent?
+  analytics         PostAnalytics?
+  challengeSubmission ChallengeSubmission?
 
   @@index([userId])
   @@index([isPublic, createdAt])
@@ -449,6 +461,8 @@ model Artboard {
   template      Template?              @relation(fields: [templateId], references: [id], onDelete: SetNull)
   snapshots     ArtboardSnapshot[]
   collaborators ArtboardCollaborator[]
+  effects       DesignEffect[]
+  animations    DesignAnimation[]
 
   @@index([projectId])
   @@index([templateId])
@@ -509,6 +523,48 @@ model ArtboardCollaborator {
   @@index([artboardId])
   @@index([userId])
   @@map("artboard_collaborators")
+}
+
+// Design Effects (filters, shadows, blur, etc.)
+model DesignEffect {
+  id          String   @id @default(cuid())
+  artboardId  String
+  objectId    String   // Fabric.js object ID
+  effectType  String   // 'filter', 'shadow', 'blur', 'glow', 'outline'
+  properties  Json     // Effect-specific properties
+  isEnabled   Boolean  @default(true)
+  order       Int      @default(0) // For stacking effects
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  artboard Artboard @relation(fields: [artboardId], references: [id], onDelete: Cascade)
+
+  @@index([artboardId])
+  @@index([objectId])
+  @@map("design_effects")
+}
+
+// Animation presets and keyframes
+model DesignAnimation {
+  id          String   @id @default(cuid())
+  artboardId  String
+  objectId    String   // Fabric.js object ID
+  name        String   // Animation name
+  animationType String // 'fade', 'slide', 'rotate', 'scale', 'bounce', 'custom'
+  duration    Int      @default(1000) // Duration in milliseconds
+  delay       Int      @default(0)
+  easing      String   @default("ease-in-out") // CSS easing function
+  iterations  Int      @default(1) // 0 for infinite
+  keyframes   Json     // Array of keyframe objects
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  artboard Artboard @relation(fields: [artboardId], references: [id], onDelete: Cascade)
+
+  @@index([artboardId])
+  @@index([objectId])
+  @@map("design_animations")
 }
 
 // ==========================================
@@ -679,4 +735,212 @@ model ContentPurchase {
   @@index([userId])
   @@index([premiumContentId])
   @@map("content_purchases")
+}
+
+// ==========================================
+// ANALYTICS MODELS
+// ==========================================
+
+// Track post views, likes, and engagement
+model PostAnalytics {
+  id                String   @id @default(cuid())
+  postId            String   @unique
+  views             Int      @default(0)
+  uniqueViews       Int      @default(0)
+  likes             Int      @default(0)
+  comments          Int      @default(0)
+  shares            Int      @default(0)
+  avgWatchTime      Float?   // For videos, in seconds
+  engagementRate    Float    @default(0) // Calculated: (likes + comments + shares) / views
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("post_analytics")
+}
+
+// Track creator profile analytics
+model CreatorAnalytics {
+  id                  String   @id @default(cuid())
+  creatorProfileId    String   @unique
+  date                DateTime @default(now()) @db.Date
+  profileViews        Int      @default(0)
+  newFollowers        Int      @default(0)
+  totalFollowers      Int      @default(0)
+  totalLikes          Int      @default(0)
+  totalComments       Int      @default(0)
+  totalPosts          Int      @default(0)
+  totalVideoViews     Int      @default(0)
+  totalImageViews     Int      @default(0)
+  engagementRate      Float    @default(0)
+  audienceDemographics Json?   // { ageGroups, locations, interests }
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  creatorProfile CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorProfileId, date])
+  @@index([creatorProfileId])
+  @@index([date])
+  @@map("creator_analytics")
+}
+
+// ==========================================
+// COMMUNITY FEATURES
+// ==========================================
+
+// Direct Messages
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  DELETED
+}
+
+model DirectMessage {
+  id             String        @id @default(cuid())
+  conversationId String
+  senderId       String
+  receiverId     String
+  content        String        @db.Text
+  mediaUrl       String?
+  mediaType      String?       // 'image', 'video', 'file'
+  status         MessageStatus @default(SENT)
+  isEdited       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("sentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("receivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@map("direct_messages")
+}
+
+model Conversation {
+  id              String   @id @default(cuid())
+  participant1Id  String
+  participant2Id  String
+  lastMessageAt   DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  participant1 User            @relation("conversations1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2 User            @relation("conversations2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  messages     DirectMessage[]
+
+  @@unique([participant1Id, participant2Id])
+  @@index([participant1Id])
+  @@index([participant2Id])
+  @@map("conversations")
+}
+
+// Creator Challenges
+enum ChallengeStatus {
+  UPCOMING
+  ACTIVE
+  ENDED
+  ARCHIVED
+}
+
+model Challenge {
+  id            String          @id @default(cuid())
+  title         String
+  description   String          @db.Text
+  coverImageUrl String?
+  rules         String          @db.Text
+  prize         String?
+  startDate     DateTime
+  endDate       DateTime
+  status        ChallengeStatus @default(UPCOMING)
+  maxSubmissions Int?           // Limit per user
+  totalSubmissions Int          @default(0)
+  totalParticipants Int         @default(0)
+  createdBy     String?         // Admin who created it
+  tags          String[]        @default([])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  submissions ChallengeSubmission[]
+
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("challenges")
+}
+
+model ChallengeSubmission {
+  id            String   @id @default(cuid())
+  challengeId   String
+  userId        String
+  postId        String   @unique
+  votes         Int      @default(0)
+  isWinner      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User      @relation("challengeSubmissions", fields: [userId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId, postId])
+  @@index([challengeId])
+  @@index([userId])
+  @@index([postId])
+  @@map("challenge_submissions")
+}
+
+// Community Forums
+enum ForumCategory {
+  GENERAL
+  TUTORIALS
+  FEEDBACK
+  SHOWCASE
+  HELP
+  ANNOUNCEMENTS
+}
+
+model ForumThread {
+  id            String        @id @default(cuid())
+  title         String
+  content       String        @db.Text
+  category      ForumCategory @default(GENERAL)
+  authorId      String
+  isPinned      Boolean       @default(false)
+  isLocked      Boolean       @default(false)
+  views         Int           @default(0)
+  totalReplies  Int           @default(0)
+  lastReplyAt   DateTime?
+  tags          String[]      @default([])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  author  User              @relation("forumThreads", fields: [authorId], references: [id], onDelete: Cascade)
+  replies ForumReply[]
+
+  @@index([authorId])
+  @@index([category])
+  @@index([isPinned])
+  @@map("forum_threads")
+}
+
+model ForumReply {
+  id         String   @id @default(cuid())
+  threadId   String
+  authorId   String
+  content    String   @db.Text
+  isEdited   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  thread ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User        @relation("forumReplies", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([authorId])
+  @@map("forum_replies")
 }
